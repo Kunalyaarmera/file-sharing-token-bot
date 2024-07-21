@@ -98,19 +98,19 @@ async def get_verify_status(user_id):
     verify = await db_verify_status(user_id)
     return verify
 
-async def update_verify_status(user_id, verify_token="", is_verified=False, verified_time=0, link=""):
-    current = await db_verify_status(user_id)
-    current['verify_token'] = verify_token
-    current['is_verified'] = is_verified
-    current['verified_time'] = verified_time
-    current['link'] = link
-    await db_update_verify_status(user_id, current)
+#async def update_verify_status(user_id, verify_token="", is_verified=False, verified_time=0, link=""):
+   # current = await db_verify_status(user_id)
+  #  current['verify_token'] = verify_token
+   # current['is_verified'] = is_verified
+#    current['verified_time'] = verified_time
+  #  current['link'] = link
+  #  await db_update_verify_status(user_id, current)
 
 
-async def get_shortlink(url, api, link):
-    shortzy = Shortzy(api_key=api, base_site=url)
-    link = await shortzy.convert(link)
-    return link
+#async def get_shortlink(url, api, link):
+   # shortzy = Shortzy(api_key=api, base_site=url)
+#    link = await shortzy.convert(link)
+  #  return link
 
 def get_exp_time(seconds):
     periods = [('days', 86400), ('hours', 3600), ('mins', 60), ('secs', 1)]
