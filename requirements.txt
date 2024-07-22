@@ -16,4 +16,3 @@ shortzy
 aiohttp
 aiofiles
 asyncio
-pyrogram
