@@ -1,14 +1,13 @@
-
 from aiohttp import web
 from plugins import web_server
-
 import pyromod.listen
-from pyrogram import Client
+from pyrogram import Client, filters
 from pyrogram.enums import ParseMode
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+import os
 import sys
 from datetime import datetime
-
-from config import API_HASH, APP_ID, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL, CHANNEL_ID, PORT
+from config import API_HASH, APP_ID, LOGGER, TG_BOT_TOKEN, TG_BOT_WORKERS, FORCE_SUB_CHANNEL, CHANNEL_ID, PORT, OWNER_ID
 
 class Bot(Client):
     def __init__(self):
@@ -66,6 +65,42 @@ class Bot(Client):
         bind_address = "0.0.0.0"
         await web.TCPSite(app, bind_address, PORT).start()
 
+        # Adding settings panel
+        self.add_handler(filters.command("settings") & filters.user(OWNER_ID), self.open_settings)
+        self.add_handler(filters.callback_query, self.handle_callback_query)
+
     async def stop(self, *args):
         await super().stop()
         self.LOGGER(__name__).info("Bot stopped.")
+
+    async def open_settings(self, client, message):
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("Set API Key", callback_data="set_api_key")],
+            [InlineKeyboardButton("Set Channel ID", callback_data="set_channel_id")],
+            [InlineKeyboardButton("Set Force Sub Channel", callback_data="set_force_sub_channel")]
+        ])
+        await message.reply("Choose the setting to change:", reply_markup=keyboard)
+
+    async def handle_callback_query(self, client, query: CallbackQuery):
+        data = query.data
+
+        if data == "set_api_key":
+            await query.message.reply("Send me the new API key.")
+            new_value = await self.listen(OWNER_ID)
+            os.environ["SHORTLINK_API"] = new_value.text
+            await query.message.reply(f"API key updated to: {new_value.text}")
+
+        elif data == "set_channel_id":
+            await query.message.reply("Send me the new Channel ID.")
+            new_value = await self.listen(OWNER_ID)
+            os.environ["CHANNEL_ID"] = new_value.text
+            await query.message.reply(f"Channel ID updated to: {new_value.text}")
+
+        elif data == "set_force_sub_channel":
+            await query.message.reply("Send me the new Force Sub Channel ID.")
+            new_value = await self.listen(OWNER_ID)
+            os.environ["FORCE_SUB_CHANNEL"] = new_value.text
+            await query.message.reply(f"Force Sub Channel ID updated to: {new_value.text}")
+
+bot = Bot()
+bot.run()
